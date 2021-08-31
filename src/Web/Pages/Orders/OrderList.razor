@@ -1,0 +1,49 @@
+﻿@page "/orders"
+@inherits OrderListBase
+
+@if (OrderList == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <MudTable Items="@OrderList.Take(20)" Bordered="true" Striped="true" Dense="true" FixedHeader="true" Height="500px">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Orders</MudText>
+            <MudSpacer />
+        </ToolBarContent>
+        
+        <HeaderContent>
+            <MudTh>Object Number</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh>Address</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Start date</MudTh>
+            <MudTh>End date</MudTh>
+            <MudTh>Invoice date</MudTh>
+            <MudTh>Edit</MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Object number">@context.ObjectNumber</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+            <MudTd DataLabel="Address">@context.Address</MudTd>
+            <MudTd DataLabel="Order status">@context.OrderStatus</MudTd>
+            <MudTd DataLabel="Start date">@context.StartDate?.ToShortDateString()</MudTd>
+            <MudTd DataLabel="End date">@context.EndDate?.ToShortDateString()</MudTd>
+            <MudTd DataLabel="Invoice date">@context.InvoiceDate?.ToShortDateString()</MudTd>
+            @{ var uri = $"/orders/{context.OrderId}"; }
+            <MudTd DataLabel="Edit">
+                <MudLink Href="@uri">
+                    <MudIcon Icon="@Icons.Material.Filled.Edit" Title="Edit" />
+                </MudLink>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+
+    </MudTable>
+}

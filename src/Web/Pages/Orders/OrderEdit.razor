@@ -1,0 +1,63 @@
+﻿@page "/orders/{Id:int}"
+@using APIClient.Model
+@inherits OrderEditBase
+
+@if (OrderGetResult == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div style="max-width: 400px;">
+        <EditForm Model="@OrderGetResult"
+                  OnValidSubmit="@OnValidSubmit"
+                  OnInvalidSubmit="@OnInvalidSubmit">
+            
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Description"
+                                  HelperText="Description of the order"
+                                  @bind-Value="@OrderGetResult.Description"
+                                  For="@(() => OrderGetResult.Description)" />
+
+                    <MudTextField Label="Address"
+                                  Class="mt-4"
+                                  HelperText="Address of the order"
+                                  @bind-Value="@OrderGetResult.Address"
+                                  For="@(() => OrderGetResult.Address)" />
+
+                    <MudDatePicker Label="Start date"
+                                   Class="mt-4"
+                                   HelperText="Start date of order"
+                                   @bind-Date="@OrderGetResult.StartDate"
+                                   For="@(() => OrderGetResult.StartDate)" />
+                    
+                    <MudDatePicker Label="End date"
+                                   Class="mt-4"
+                                   HelperText="End date of order"
+                                   @bind-Date="@OrderGetResult.EndDate"
+                                   For="@(() => OrderGetResult.EndDate)" />
+                    
+                    <MudDatePicker Label="Invoice date"
+                                   Class="mt-4"
+                                   HelperText="Invoice date of order"
+                                   @bind-Date="@OrderGetResult.InvoiceDate"
+                                   For="@(() => OrderGetResult.InvoiceDate)" />
+                    
+                <MudSelect
+                    T="OrderStatus"
+                    Class="mt-5"
+                    Label="Order status"
+                    Strict="true"
+                    HelperText="Current status for this order">
+                        @foreach (var status in Enum.GetValues<OrderStatus>())
+                        {
+                            <MudSelectItem T="OrderStatus" Value="status">@status.ToString()</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudCardContent>
+            </MudCard>
+
+        </EditForm>
+    </div>
+}
