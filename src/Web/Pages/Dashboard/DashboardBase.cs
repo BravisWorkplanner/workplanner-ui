@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using APIClient.Api;
-using APIClient.Client;
 using APIClient.Model;
 using ChartJs.Blazor;
 using ChartJs.Blazor.BarChart;
@@ -18,7 +15,6 @@ using ChartJs.Blazor.LineChart;
 using ChartJs.Blazor.PieChart;
 using ChartJs.Blazor.Util;
 using Microsoft.AspNetCore.Components;
-using Web.Pages.Workers;
 using Web.Shared;
 
 namespace Web.Pages.Dashboard

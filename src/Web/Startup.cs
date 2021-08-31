@@ -1,5 +1,3 @@
-using APIClient.Api;
-using APIClient.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
