@@ -1,0 +1,29 @@
+{
+  "runtime": "Net60",
+  "documentGenerator": {
+    "fromDocument": {
+      "json": "swagger.json"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "contractsNamespace": "API.Contracts",
+      "contractsOutputFilePath": "IAPIClient.cs",
+      "parameterDateTimeFormat": "s",
+      "className": "APIClient",
+      "responseClass": "APIResponse",
+      "namespace": "API",
+      "dateType": "System.DateTime",
+      "dateTimeType": "System.DateTime",
+      "timeType": "System.TimeSpan",
+      "timeSpanType": "System.TimeSpan",
+      "output": "APIClient.cs",
+      "generateClientClasses": true,
+      "generateClientInterfaces": true,
+      "generateContractsOutput": true,
+      "injectHttpClient": true,
+      "useBaseUrl": false,
+      "wrapResponses": true
+    }
+  }
+}

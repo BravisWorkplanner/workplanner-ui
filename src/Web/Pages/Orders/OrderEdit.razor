@@ -1,5 +1,6 @@
 ﻿@page "/orders/{Id:int}"
-@using APIClient.Model
+@using API.Contracts
+@using Web.Pages.Orders.Components
 @inherits OrderEditBase
 
 @if (OrderGetResult == null)
@@ -8,56 +9,183 @@
 }
 else
 {
-    <div style="max-width: 400px;">
-        <EditForm Model="@OrderGetResult"
-                  OnValidSubmit="@OnValidSubmit"
-                  OnInvalidSubmit="@OnInvalidSubmit">
-            
-            <MudCard>
-                <MudCardContent>
-                    <MudTextField Label="Description"
-                                  HelperText="Description of the order"
-                                  @bind-Value="@OrderGetResult.Description"
-                                  For="@(() => OrderGetResult.Description)" />
+    <MudGrid>
+        <MudItem xs="4">
+            <EditForm Model="@OrderGetResult"
+                      OnValidSubmit="@OnValidSubmit">
+                <DataAnnotationsValidator/>
 
-                    <MudTextField Label="Address"
-                                  Class="mt-4"
-                                  HelperText="Address of the order"
-                                  @bind-Value="@OrderGetResult.Address"
-                                  For="@(() => OrderGetResult.Address)" />
+                <MudCard>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h4">Details for @OrderGetResult.ObjectNumber</MudText>
+                            <MudDivider/>
 
-                    <MudDatePicker Label="Start date"
-                                   Class="mt-4"
-                                   HelperText="Start date of order"
-                                   @bind-Date="@OrderGetResult.StartDate"
-                                   For="@(() => OrderGetResult.StartDate)" />
-                    
-                    <MudDatePicker Label="End date"
-                                   Class="mt-4"
-                                   HelperText="End date of order"
-                                   @bind-Date="@OrderGetResult.EndDate"
-                                   For="@(() => OrderGetResult.EndDate)" />
-                    
-                    <MudDatePicker Label="Invoice date"
-                                   Class="mt-4"
-                                   HelperText="Invoice date of order"
-                                   @bind-Date="@OrderGetResult.InvoiceDate"
-                                   For="@(() => OrderGetResult.InvoiceDate)" />
-                    
-                <MudSelect
-                    T="OrderStatus"
-                    Class="mt-5"
-                    Label="Order status"
-                    Strict="true"
-                    HelperText="Current status for this order">
-                        @foreach (var status in Enum.GetValues<OrderStatus>())
-                        {
-                            <MudSelectItem T="OrderStatus" Value="status">@status.ToString()</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudCardContent>
-            </MudCard>
+                            <span Style="padding-top: 5px"/>
 
-        </EditForm>
-    </div>
+                            <MudGrid>
+                                <MudItem xs="8">
+                                    <MudText Typo="Typo.h5">Customer</MudText>
+                                    <MudText Typo="Typo.h6">@OrderGetResult.CustomerName</MudText>
+                                    <MudText Typo="Typo.h6">@OrderGetResult.CustomerPhoneNumber</MudText>
+                                </MudItem>
+
+                                <MudItem xs="4">
+                                    <MudText Typo="Typo.h5" >Current</MudText>
+                                    <MudText Typo="Typo.h6">@Math.Round(@OrderGetResult.Expenses.Sum(x => x.Price), 2) SEK</MudText>
+                                    <MudText Typo="Typo.h6">@OrderGetResult.TimeRegistrations.Sum(x => x.Hours) hrs</MudText>
+                                </MudItem>
+                            </MudGrid>
+
+
+                        </CardHeaderContent>
+                    </MudCardHeader>
+
+                    <MudCardContent>
+                        <MudTextField
+                            T="string"
+                            Lines="2"
+                            Label="Description"
+                            HelperText="Description of the order"
+                            @bind-Value="@OrderGetResult.Description"
+                            For="@(() => OrderGetResult.Description)"/>
+
+                        <MudTextField
+                            T="string"
+                            Label="Address"
+                            Class="mt-4"
+                            HelperText="Address of the order"
+                            @bind-Value="@OrderGetResult.Address"
+                            For="@(() => OrderGetResult.Address)"/>
+
+                        <MudDatePicker Label="Start date"
+                                       Class="mt-4"
+                                       HelperText="Start date of order"
+                                       @bind-Date="@OrderGetResult.StartDate"
+                                       For="@(() => OrderGetResult.StartDate)"/>
+
+                        <MudDatePicker Label="End date"
+                                       Class="mt-4"
+                                       HelperText="End date of order"
+                                       @bind-Date="@OrderGetResult.EndDate"
+                                       For="@(() => OrderGetResult.EndDate)"/>
+
+                        <MudDatePicker Label="Invoice date"
+                                       Class="mt-4"
+                                       HelperText="Invoice date of order"
+                                       @bind-Date="@OrderGetResult.InvoiceDate"
+                                       For="@(() => OrderGetResult.InvoiceDate)"/>
+
+                        <MudSelect T="OrderStatus"
+                                   Class="mt-5"
+                                   Label="Order status"
+                                   Strict="true"
+                                   HelperText="Current status for this order"
+                                   @bind-Value="@OrderGetResult.OrderStatus">
+
+                            @foreach (var status in Enum.GetValues<OrderStatus>())
+                            {
+                                <MudSelectItem Value="@status">@status</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudCardContent>
+
+                    <MudCardActions Style="justify-content: flex-end">
+                        <MudButton
+                            OnClick="@(() => DeleteOrderAsync(Id))"
+                            Variant="Variant.Filled"
+                            StartIcon="@Icons.Material.Filled.Delete"
+                            Color="Color.Error"
+                            Size="Size.Large">
+                            Delete
+                        </MudButton>
+                        <MudButton
+                            Style="margin-left: 10px"
+                            ButtonType="ButtonType.Submit"
+                            Variant="Variant.Filled"
+                            StartIcon="@Icons.Material.Filled.Save"
+                            Color="Color.Info"
+                            Size="Size.Large">
+                            Save
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </EditForm>
+        </MudItem>
+        <MudItem xs="8">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudCard Outlined="true">
+                        <MudTable
+                            Items="@OrderGetResult.Expenses.OrderByDescending(x => x.Id).Take(5)"
+                            Hover="true"
+                            Bordered="true"
+                            Striped="true"
+                            FixedHeader="true"
+                            Breakpoint="Breakpoint.Xs">
+                            <ToolBarContent>
+                                <MudText Typo="Typo.h6">Recent expenses</MudText>
+                                <MudButton
+                                    StartIcon="@Icons.Filled.AddCircleOutline"
+                                    OnClick="OpenCreateExpenseDialogAsync"
+                                    Color="Color.Success"
+                                    Size="Size.Medium">
+                                    Create
+                                </MudButton>
+                            </ToolBarContent>
+                            <HeaderContent>
+                                <MudTh>Price</MudTh>
+                                <MudTh>Description</MudTh>
+                                <MudTh>Type</MudTh>
+                                <MudTh>Worker</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Price">@context.Price SEK</MudTd>
+                                <MudTd DataLabel="Description">@context.Description</MudTd>
+                                <MudTd DataLabel="Type">@context.Product</MudTd>
+                                <MudTd DataLabel="Worker">@context.Worker</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudCard Outlined="true">
+                        <MudTable
+                            Items="@OrderGetResult.TimeRegistrations.OrderByDescending(x => x.CreatedAt).Take(5)"
+                            Hover="true"
+                            Bordered="true"
+                            Striped="true"
+                            FixedHeader="true"
+                            Breakpoint="Breakpoint.Xs">
+                            <ToolBarContent>
+                                <MudText Typo="Typo.h6">Recent time registrations</MudText>
+                                <MudButton
+                                    StartIcon="@Icons.Filled.AddCircleOutline"
+                                    OnClick="OpenCreateTimeRegistrationDialogAsync"
+                                    Color="Color.Success"
+                                    Size="Size.Medium">
+                                    Create
+                                </MudButton>
+                            </ToolBarContent>
+                            <HeaderContent>
+                                <MudTh>Week</MudTh>
+                                <MudTh>Hours</MudTh>
+                                <MudTh>Worker</MudTh>
+                                <MudTh>Created</MudTh>
+                            </HeaderContent>
+
+                            <RowTemplate>
+                                <MudTd DataLabel="Week">@context.Week</MudTd>
+                                <MudTd DataLabel="Hours">@context.Hours hrs</MudTd>
+                                <MudTd DataLabel="Worker">@context.Worker</MudTd>
+                                <MudTd DataLabel="Created">@context.Day.ToShortDateString()</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+
+
+    </MudGrid>
 }

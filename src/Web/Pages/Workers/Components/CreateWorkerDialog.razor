@@ -1,0 +1,32 @@
+﻿@using API.Contracts
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1"/>
+            Create new worker
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@worker.Name" Label="Name"/>
+        <MudTextField @bind-Value="@worker.PhoneNumber"
+                      HelperText="Swedish phone number format (+46 or 07xx)"
+                      Label="Customer phone number"/>
+        <MudTextField @bind-Value="@worker.Company" Label="Company"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Create worker</MudButton>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    private WorkerCreateRequest worker = new();
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(worker));
+
+    void Cancel() => MudDialog.Cancel();
+}
