@@ -49,11 +49,7 @@ namespace Web.Pages.Dashboard
 
         protected override void OnInitialized()
         {
-            RenderPieChartForOrderStatus();
-            RenderPieChartForPricePerProductCost();
-            RenderBarChartForPricePerWorker();
-            RenderLineChartForProductPerWorkerCost();
-            RenderLineChartForProductPerWeekCost();
+            RenderCharts();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -67,102 +63,27 @@ namespace Web.Pages.Dashboard
                 OngoingOrders = OrderList.Where(x => x.OrderStatus == OrderStatus.OnGoing).OrderByDescending(x => x.StartDate).ToList();
                 UpcomingOrders = OrderList.Where(x => x.OrderStatus == OrderStatus.NotStarted && x.StartDate.Value > DateTime.UtcNow.AddDays(1)).OrderByDescending(x => x.StartDate).ToList();
 
+                PopulateOrderStatusPieChart();
+                PopulateBarChartForPricePerWorkerData();
+                PopulatePieChartForPricePerProductData();
+                PopulateLineChartForProductPerWeekData();
+                PopulateLineChartForProductPerWorkerData();
+
+                // reloads states and components, updating with data from the async calls above
                 await InvokeAsync(StateHasChanged);
             }
         }
 
         protected double CalculateTotalPriceForOrder(int orderId) => Math.Round(ExpenseList.Where(x => x.OrderId == orderId).Sum(x => x.Price), 2);
 
-        private void RenderBarChartForPricePerWorker()
+        #region Render charts
+        private void RenderCharts()
         {
-            _pricePerWorkerBarChartConfig.Options = new BarOptions
-            {
-                Responsive = true,
-                Legend = new Legend
-                {
-                    Position = Position.Top,
-                },
-                Title = new OptionsTitle
-                {
-                    Display = true,
-                    Text = "Price per worker per product",
-                },
-            };
-
-            var dataSet = new BarDataset<double>(
-                new[]
-                {
-                    150.90,
-                    123.73,
-                    155.66,
-                    1634.12,
-                })
-            {
-                Label = "My first dataset",
-                BackgroundColor = ColorUtil.FromDrawingColor(Color.FromArgb(128, Utils.ChartColors.Red)),
-                BorderColor = ColorUtil.FromDrawingColor(Utils.ChartColors.Red),
-                BorderWidth = 1,
-            };
-
-            foreach (var worker in new[] { "Person1", "Person2", "Person3", "Person4" })
-            {
-                _pricePerWorkerBarChartConfig.Data.Labels.Add(worker);
-            }
-
-            var datasets = Enumerable.Range(0, 4).Select(
-                x => new BarDataset<double>(new[]
-                {
-                    random.NextDouble() * (1000 - 250) + 250,
-                    random.NextDouble() * (1000 - 250) + 250,
-                    random.NextDouble() * (1000 - 250) + 250,
-                    random.NextDouble() * (1000 - 250) + 250,
-                })
-                {
-                    Label = $"Dataset {x}",
-                    BackgroundColor = ColorUtil.FromDrawingColor(Color.FromArgb(128, Utils.ChartColors.All[x])),
-                    BorderColor = ColorUtil.FromDrawingColor(Utils.ChartColors.All[x]),
-                    BorderWidth = 1,
-                });
-
-            _pricePerWorkerBarChartConfig.Data.Datasets.AddRange(datasets);
-        }
-
-        private void RenderPieChartForPricePerProductCost()
-        {
-            _pricePerProductCostPieChartConfig.Options = new PieOptions
-            {
-                Responsive = true,
-                Title = new OptionsTitle
-                {
-                    Display = true,
-                    Text = "Cost per product type",
-                },
-            };
-
-            foreach (var product in Enum.GetValues<Product>())
-            {
-                _pricePerProductCostPieChartConfig.Data.Labels.Add(product.ToString());
-            }
-
-            var dataSet = new PieDataset<double>(
-                new[]
-                {
-                    Convert.ToDouble(random.Next(150, 25000)),
-                    Convert.ToDouble(random.Next(150, 25000)),
-                    Convert.ToDouble(random.Next(150, 25000)),
-                    Convert.ToDouble(random.Next(150, 25000)),
-                })
-            {
-                BackgroundColor = new[]
-                {
-                    ColorUtil.ColorHexString(255, 99, 132), // Slice 1 aka "Red"
-                    ColorUtil.ColorHexString(255, 205, 86), // Slice 2 aka "Yellow"
-                    ColorUtil.ColorHexString(75, 192, 192), // Slice 3 aka "Green"
-                    ColorUtil.ColorHexString(54, 162, 235), // Slice 4 aka "Blue"
-                },
-            };
-
-            _pricePerProductCostPieChartConfig.Data.Datasets.Add(dataSet);
+            RenderPieChartForOrderStatus();
+            RenderPieChartForPricePerProductCost();
+            RenderBarChartForPricePerWorker();
+            RenderLineChartForProductPerWorkerCost();
+            RenderLineChartForProductPerWeekCost();
         }
 
         private void RenderPieChartForOrderStatus()
@@ -188,24 +109,41 @@ namespace Web.Pages.Dashboard
 
                 _orderStatusPieConfig.Data.Labels.Add(status.ToString());
             }
+        }
 
-            var dataSet = new PieDataset<int>(
-                new[]
-                {
-                    5,
-                    10,
-                    2,
-                })
+        private void RenderPieChartForPricePerProductCost()
+        {
+            _pricePerProductCostPieChartConfig.Options = new PieOptions
             {
-                BackgroundColor = new[]
+                Responsive = true,
+                Title = new OptionsTitle
                 {
-                    ColorUtil.ColorHexString(255, 99, 132), // Slice 1 aka "Red"
-                    ColorUtil.ColorHexString(255, 205, 86), // Slice 2 aka "Yellow"
-                    ColorUtil.ColorHexString(75, 192, 192), // Slice 3 aka "Green"
+                    Display = true,
+                    Text = "Cost per product type",
                 },
             };
 
-            _orderStatusPieConfig.Data.Datasets.Add(dataSet);
+            foreach (var product in Enum.GetValues<Product>())
+            {
+                _pricePerProductCostPieChartConfig.Data.Labels.Add(product.ToString());
+            }
+        }
+
+        private void RenderBarChartForPricePerWorker()
+        {
+            _pricePerWorkerBarChartConfig.Options = new BarOptions
+            {
+                Responsive = true,
+                Legend = new Legend
+                {
+                    Position = Position.Top,
+                },
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Price per worker",
+                },
+            };
         }
 
         private void RenderLineChartForProductPerWeekCost()
@@ -252,21 +190,6 @@ namespace Web.Pages.Dashboard
                         },
                 },
             };
-
-            _costPerProductLineChartConfig.Data.Labels.AddRange(Enumerable.Range(0, 7).Select(x => $"Week {x+1}"));
-
-            foreach (var product in Enum.GetValues<Product>())
-            {
-                IDataset<int> data = new LineDataset<int>(Enumerable.Range(0, 7).Select(x => x * random.Next(1500, 234234)))
-                {
-                    Label = product.ToString(),
-                    BackgroundColor = ColorUtil.FromDrawingColor(Utils.ChartColors.All[(int)product]),
-                    BorderColor = ColorUtil.FromDrawingColor(Utils.ChartColors.All[(int)product]),
-                    Fill = FillingMode.Disabled,
-                };
-
-                _costPerProductLineChartConfig.Data.Datasets.Add(data);
-            }
         }
 
         private void RenderLineChartForProductPerWorkerCost()
@@ -313,7 +236,98 @@ namespace Web.Pages.Dashboard
                         },
                 },
             };
+        }
 
+        #endregion
+
+        #region Popuelate charts from asynchrounos data
+        private void PopulateOrderStatusPieChart()
+        {
+            var dataSet = new PieDataset<int>(
+                new[]
+                {
+                    OrderList.Count(x => x.OrderStatus == OrderStatus.NotStarted),
+                    OrderList.Count(x => x.OrderStatus == OrderStatus.OnGoing),
+                    OrderList.Count(x => x.OrderStatus == OrderStatus.OnHold),
+                })
+            {
+                // move these to configuration/static utils (random numbers does not tell the correct story)
+                BackgroundColor = new[]
+                {
+                    ColorUtil.ColorHexString(255, 99, 132), // Slice 1 aka "Red"
+                    ColorUtil.ColorHexString(255, 205, 86), // Slice 2 aka "Yellow"
+                    ColorUtil.ColorHexString(75, 192, 192), // Slice 3 aka "Green"
+                },
+            };
+
+            _orderStatusPieConfig.Data.Datasets.Add(dataSet);
+        }
+
+        private void PopulatePieChartForPricePerProductData()
+        {
+            var dataSet = new PieDataset<double>(
+                new[]
+                {
+                    Convert.ToDouble(random.Next(150, 25000)),
+                    Convert.ToDouble(random.Next(150, 25000)),
+                    Convert.ToDouble(random.Next(150, 25000)),
+                    Convert.ToDouble(random.Next(150, 25000)),
+                })
+            {
+                BackgroundColor = new[]
+                {
+                    ColorUtil.ColorHexString(255, 99, 132), // Slice 1 aka "Red"
+                    ColorUtil.ColorHexString(255, 205, 86), // Slice 2 aka "Yellow"
+                    ColorUtil.ColorHexString(75, 192, 192), // Slice 3 aka "Green"
+                    ColorUtil.ColorHexString(54, 162, 235), // Slice 4 aka "Blue"
+                },
+            };
+
+            _pricePerProductCostPieChartConfig.Data.Datasets.Add(dataSet);
+        }
+
+        private void PopulateBarChartForPricePerWorkerData()
+        {
+            var workerIdListOrderedByName = WorkerList.OrderBy(x => x.Name).Select(x => new {x.WorkerId, x.Name}).Take(8);
+
+            foreach (var worker in workerIdListOrderedByName)
+            {
+                _pricePerWorkerBarChartConfig.Data.Labels.Add(worker.Name);
+            }
+
+            var expenseList = workerIdListOrderedByName.Select(x => ExpenseList.Where(w => w.WorkerId == x.WorkerId).Sum(s => s.Price));
+
+            var dataSet = new BarDataset<double>(expenseList)
+            {
+                Label = "Expense per worker",
+                BackgroundColor = ColorUtil.FromDrawingColor(Color.FromArgb(128, Utils.ChartColors.Red)),
+                BorderColor = ColorUtil.FromDrawingColor(Utils.ChartColors.Red),
+                BorderWidth = 1,
+            };
+
+            _pricePerWorkerBarChartConfig.Data.Datasets.Add(dataSet);
+        }
+
+        private void PopulateLineChartForProductPerWeekData()
+        {
+            _costPerProductLineChartConfig.Data.Labels.AddRange(Enumerable.Range(0, 7).Select(x => $"Week {x+1}"));
+
+            foreach (var product in Enum.GetValues<Product>())
+            {
+                IDataset<int> data = new LineDataset<int>(Enumerable.Range(0, 7).Select(x => x * random.Next(1500, 234234)))
+                {
+                    Label = product.ToString(),
+                    BackgroundColor = ColorUtil.FromDrawingColor(Utils.ChartColors.All[(int)product]),
+                    BorderColor = ColorUtil.FromDrawingColor(Utils.ChartColors.All[(int)product]),
+                    Fill = FillingMode.Disabled,
+                };
+
+                _costPerProductLineChartConfig.Data.Datasets.Add(data);
+            }
+        }
+
+        private void PopulateLineChartForProductPerWorkerData()
+        {
             _costPerWorkerLineChartConfig.Data.Labels.AddRange(Enumerable.Range(0, 7).Select(x => $"Week {x+1}"));
 
             int index = 0;
@@ -332,5 +346,7 @@ namespace Web.Pages.Dashboard
                 index++;
             }
         }
+
+        #endregion
     }
 }
