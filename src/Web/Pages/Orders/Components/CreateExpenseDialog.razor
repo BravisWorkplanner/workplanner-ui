@@ -1,0 +1,133 @@
+﻿@using API.Contracts
+@using API
+@using Microsoft.Extensions.Logging
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1"/>
+            Add expense to B-@OrderId
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+            <MudNumericField
+                T="double?"
+                HideSpinButtons="true"
+                @bind-Value="@tempPrice"
+                Label="Price"
+                Required="true"
+                RequiredError="Price must be entered."
+                Validation="@(new Func<double?, string>(ValidatePrice))"/>
+
+            <MudTextField
+                @bind-Value="@expense.Description"
+                Label="Description"/>
+
+            <MudSelect T="int"
+                       @bind-Value="@expense.WorkerId"
+                       Label="Worker"
+                       Strict="true"
+                       Required="true"
+                       RequiredError="Worker must be selected."
+                       AnchorOrigin="Origin.BottomCenter"
+                       Validation="@(new Func<int, string>(x => x != 0 ? null : "Please provide valid worker" ))">
+                @foreach (var item in workers)
+                {
+                    <MudSelectItem Value="@item.WorkerId">@item.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="int"
+                       @bind-Value="@expense.ProductId"
+                       Label="Product"
+                       Strict="true"
+                       Required="true"
+                       RequiredError="Product must be selected."
+                       AnchorOrigin="Origin.BottomCenter"
+                       Validation="@(new Func<int, string>(x => x != 0 ? null : "Please provide valid product"))">
+                @foreach (var item in products)
+                {
+                    <MudSelectItem Value="@item.ProductId">@item.Type</MudSelectItem>
+                }
+            </MudSelect>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Create expense</MudButton>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private OrderExpenseCreateRequest expense = new();
+    private ICollection<WorkerListResult> workers = new List<WorkerListResult>();
+    private ICollection<ProductListResult> products = new List<ProductListResult>();
+
+    private double? tempPrice;
+    private MudForm form;
+    private bool success;
+    private string[] errors = { };
+
+    [Parameter]
+    public int OrderId { get; set; }
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Inject]
+    IAPIClient APIClient { get; set; }
+
+    [Inject]
+    ILogger<CreateExpenseDialog> Logger { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadWorkerAndProductDataAsync();
+    }
+
+    private async Task LoadWorkerAndProductDataAsync()
+    {
+        var workerList = await APIClient.HandleHttpCallAsync(() => APIClient.Worker_ListAsync(100, 1), Logger);
+        if (workerList.Success)
+        {
+            workers = workerList.Data;
+        }
+
+        var productList = await APIClient.HandleHttpCallAsync(() => APIClient.Product_ListAsync(100, 1), Logger);
+        if (productList.Success)
+        {
+            products = productList.Data;
+        }
+    }
+
+    void Submit()
+    {
+        form.Validate();
+        if (!form.IsValid || form.Errors.Any())
+        {
+            errors = form.Errors;
+            return;
+        }
+
+        expense.Price = tempPrice.Value;
+        MudDialog.Close(DialogResult.Ok(expense));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+    private string ValidatePrice(double? arg)
+    {
+        if (!arg.HasValue)
+        {
+            return "Please enter price.";
+        }
+
+        if (arg.Value == default || arg.Value == 0.0)
+        {
+            return "Please enter valid price. Prices are in swedish kronor, with 2 decimals.";
+        }
+
+        return null;
+    }
+
+}

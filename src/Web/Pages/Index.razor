@@ -1,3 +1,146 @@
 ﻿@page "/"
+@using API.Contracts
+@using API
+@using Microsoft.Extensions.Logging
 
-<h1>Welcome, home!</h1>
+<MudGrid>
+    <MudItem xs="5">
+        <MudCard Outlined="true">
+            <MudTable Items="@OnGoingOrders"
+                      Bordered="true"
+                      Striped="true"
+                      FixedHeader="true"
+                      Loading="@isLoading"
+                      Breakpoint="Breakpoint.Xs">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">On-going orders</MudText>
+                </ToolBarContent>
+                <ColGroup>
+                    <col style="width: 15%;"/>
+                    <col/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 15%;"/>
+                    <col style="width: 20%;"/>
+                </ColGroup>
+                <HeaderContent>
+                    <MudTh>Order</MudTh>
+                    <MudTh>Address</MudTh>
+                    <MudTh>Start date</MudTh>
+                    <MudTh>Total hrs</MudTh>
+                    <MudTh>Expenses</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Object Number">
+                        @{
+                            var uri = $"/orders/{context.OrderId}";
+                        }
+                        <MudLink Href="@uri">@context.ObjectNumber</MudLink>
+                    </MudTd>
+                    <MudTd DataLabel="Address">@context.Address</MudTd>
+                    <MudTd DataLabel="Start date">@context.StartDate?.ToShortDateString()</MudTd>
+                    <MudTd DataLabel="Total hrs">150h</MudTd>
+                    <MudTd DataLabel="Expenses">25431,45 SEK</MudTd>
+                </RowTemplate>
+                <FooterContent>
+                    <MudTd/>
+                    <MudTd/>
+                    <MudTd/>
+                    <MudTd DataLabel="Total hrs">150h</MudTd>
+                    <MudTd DataLabel="Expenses">25431,45 SEK</MudTd>
+                </FooterContent>
+                <PagerContent>
+                    <MudTablePager/>
+                </PagerContent>
+            </MudTable>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="7">
+        <MudCard Outlined="true">
+
+            <MudTable Items="@UpComingOrders"
+                      Bordered="true"
+                      Striped="true"
+                      FixedHeader="true"
+                      Hover="true"
+                      Loading="@isLoading"
+                      Breakpoint="Breakpoint.Xs">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Orders starting within seven days</MudText>
+                </ToolBarContent>
+                <ColGroup>
+                    <col style="width: 10%;"/>
+                    <col/>
+                    <col/>
+                    <col style="width: 20%;"/>
+                </ColGroup>
+                <HeaderContent>
+                    <MudTh>Order</MudTh>
+                    <MudTh>Address</MudTh>
+                    <MudTh>Description</MudTh>
+                    <MudTh>Start date</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Object Number">
+                        @{
+                            var uri = $"/orders/{context.OrderId}";
+                        }
+                        <MudLink Href="@uri">@context.ObjectNumber</MudLink>
+                    </MudTd>
+                    <MudTd DataLabel="Address">@context.Address</MudTd>
+                    <MudTd DataLabel="Description">@context.Description</MudTd>
+                    <MudTd DataLabel="Start date">@context.StartDate?.ToShortDateString()</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager/>
+                </PagerContent>
+            </MudTable>
+
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    protected bool isLoading = true;
+
+    [Inject]
+    IAPIClient APIClient { get; set; }
+
+    [Inject]
+    ILogger<Index> Logger { get; set; }
+
+    [Inject]
+    ISnackbar Snackbar { get; set; }
+
+    private List<OrderListResult> UpComingOrders { get; set; } = new();
+
+    private List<OrderListResult> OnGoingOrders { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var orders = await APIClient.HandleHttpCallAsync(
+            () => APIClient.Order_ListAsync(50, 1),
+            Logger);
+        if (!orders.Success)
+        {
+            Snackbar.Add("Error loading orders. Please try again later.", Severity.Error);
+            return;
+        }
+
+        OnGoingOrders = orders.Data?
+                              .Where(x => x.OrderStatus == OrderStatus.OnGoing)
+                              .OrderByDescending(x => x.StartDate)
+                              .ToList();
+
+        UpComingOrders = orders.Data?
+                               .Where(x => x.OrderStatus == OrderStatus.NotStarted &&
+                                           x.StartDate.HasValue &&
+                                           x.StartDate.Value > DateTime.UtcNow.AddDays(1) &&
+                                           x.StartDate.Value < DateTime.UtcNow.AddDays(7))
+                               .OrderByDescending(x => x.StartDate)
+                               .ToList();
+
+        isLoading = false;
+    }
+
+}

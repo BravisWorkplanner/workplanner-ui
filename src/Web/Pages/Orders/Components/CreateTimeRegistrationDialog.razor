@@ -1,0 +1,140 @@
+﻿@using API.Contracts
+@using API
+@using Microsoft.Extensions.Logging
+@using System.Globalization
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1"/>
+            Add time registration to B-@OrderId
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+            <MudNumericField
+                T="double?"
+                Label="Hours"
+                HideSpinButtons="true"
+                @bind-Value="@tempHours"
+                Required="true"
+                RequiredError="Please enter a value (only .5 decimal values are allowed)."
+                Validation="@(new Func<double?, string>(ValidateHours))"/>
+
+            <MudDatePicker
+                Label="Day"
+                @bind-Date="tempDay"
+                Required="true"
+                RequiredError="Please enter a valid date."
+                Validation="@(new Func<DateTime?, string>(ValidateDate))"/>
+
+            <MudSelect
+                T="int"
+                @bind-Value="@timeRegistration.WorkerId"
+                Label="Worker"
+                Strict="true"
+                Required="true"
+                RequiredError="Worker must be selected."
+                AnchorOrigin="Origin.BottomCenter"
+                Validation="@(new Func<int, string>(x => { return x != default ? null : "Please provide valid Worker"; }))">
+                @foreach (var item in workers)
+                {
+                    <MudSelectItem Value="@item.WorkerId">@item.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+        </MudForm>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Create time registration</MudButton>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private TimeRegistrationCreateRequest timeRegistration = new();
+    private ICollection<WorkerListResult> workers = new List<WorkerListResult>();
+
+    private double? tempHours;
+    private DateTime? tempDay;
+    private MudForm form;
+    private bool success;
+    private string[] errors = { };
+
+    [Parameter]
+    public int OrderId { get; set; }
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Inject]
+    IAPIClient APIClient { get; set; }
+
+    [Inject]
+    ILogger<CreateExpenseDialog> Logger { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadWorkersAsync();
+    }
+
+    private async Task LoadWorkersAsync()
+    {
+        var workerList = await APIClient.HandleHttpCallAsync(() => APIClient.Worker_ListAsync(100, 1), Logger);
+        if (workerList.Success)
+        {
+            workers = workerList.Data;
+        }
+    }
+
+    void Submit()
+    {
+        form.Validate();
+        if (!form.IsValid || form.Errors.Any())
+        {
+            errors = form.Errors;
+            return;
+        }
+
+        timeRegistration.Hours = tempHours.Value;
+        timeRegistration.Day = tempDay.Value;
+        var week = ISOWeek.GetWeekOfYear(timeRegistration.Day);
+        var year = timeRegistration.Day.Year;
+        timeRegistration.Week = $"{year}{week}";
+
+        MudDialog.Close(DialogResult.Ok(timeRegistration));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+    private string ValidateDate(DateTime? arg)
+    {
+        if (!arg.HasValue)
+        {
+            return "Please enter date.";
+        }
+
+        if (arg.Value == default)
+        {
+            return "Please enter a valid date.";
+        }
+
+        return null;
+    }
+
+    private string ValidateHours(double? arg)
+    {
+        if (!arg.HasValue)
+        {
+            return "Please enter hours.";
+        }
+
+        if (arg.Value == default || arg.Value == 0.0)
+        {
+            return "Please enter valid hours. Whole or half hours are accepted.";
+        }
+
+        return null;
+    }
+
+}
