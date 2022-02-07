@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: workplanner-api
+  AZURE_WEBAPP_NAME: workplanner-ui
   Database:ConnectionString: ${{ secrets.SQL_CONNECTIONSTRING }}
 
 jobs:
@@ -36,7 +36,7 @@ jobs:
 
     - name: Publish
       run: |
-        dotnet publish src/API/API.csproj -c Release -o app
+        dotnet publish src/Web/Web.csproj -c Release -o app
     
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
