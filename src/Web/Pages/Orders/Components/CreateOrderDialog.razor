@@ -1,0 +1,31 @@
+﻿@using API.Contracts
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1"/>
+            Create new order
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@order.Address" Label="Address"/>
+        <MudTextField @bind-Value="@order.Description" Label="Description"/>
+        <MudTextField @bind-Value="@order.CustomerName" Label="Customer name"/>
+        <MudTextField @bind-Value="@order.CustomerPhoneNumber"
+                      HelperText="Swedish phone number format (+46 or 07xx)"
+                      Label="Customer phone number"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Create order</MudButton>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private OrderCreateRequest order = new ();
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(order));
+
+    void Cancel() => MudDialog.Cancel();
+}

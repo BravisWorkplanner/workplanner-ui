@@ -1,85 +1,96 @@
 ﻿@page "/dashboard"
 @inherits DashboardBase
 
-<MudGrid>
-    <MudItem md="4">
-        <MudCard Outlined="true">
-            <MudCardContent>
-                <Chart Height="200" Config="_orderStatusPieConfig" @ref="_orderStatusPieChart"></Chart>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
+@if (true)
+{
+    <h1>WIP</h1>
+}
+else
+{
+    <MudGrid>
+        <MudItem md="6">
+            <MudCard Outlined="true">
+                <MudTable Items="@OngoingOrders.Take(5)" Bordered="true" Striped="true" FixedHeader="true" Breakpoint="Breakpoint.Md">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">On going orders</MudText>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>Object Number</MudTh>
+                        <MudTh>Address</MudTh>
+                        <MudTh>Start date</MudTh>
+                        <MudTh>Total hrs</MudTh>
+                        <MudTh>Expenses</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Object Number">@context.ObjectNumber</MudTd>
+                        <MudTd DataLabel="Address">@context.Address</MudTd>
+                        <MudTd DataLabel="Start date">@context.StartDate?.ToShortDateString()</MudTd>
+                        <MudTd DataLabel="Total hrs">150h</MudTd>
+                        <MudTd DataLabel="Expenses">@CalculateTotalPriceForOrder() SEK</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCard>
+        </MudItem>
 
-    <MudItem md="4">
-        <MudCard Outlined="true" Elevation="3">
-            <MudCardContent>
-                <Chart Height="200" Config="_pricePerProductCostPieChartConfig" @ref="_pricePerProductCostPieChart"></Chart>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
+        <MudItem md="6">
+            <MudCard Outlined="true">
+                <MudTable Items="@UpcomingOrders.Take(5)" Bordered="true" Striped="true" FixedHeader="true" Hover="true" Breakpoint="Breakpoint.Md">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Upcoming orders</MudText>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>Object Number</MudTh>
+                        <MudTh>Address</MudTh>
+                        <MudTh>Description</MudTh>
+                        <MudTh>Start date</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Object Number">@context.ObjectNumber</MudTd>
+                        <MudTd DataLabel="Address">@context.Address</MudTd>
+                        <MudTd DataLabel="Description">@context.Description</MudTd>
+                        <MudTd DataLabel="Start date">@context.StartDate</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCard>
+        </MudItem>
+        <MudItem md="4">
+            <MudCard Outlined="true">
+                <MudCardContent>
+                    <Chart Height="200" Config="_orderStatusPieConfig" @ref="_orderStatusPieChart"></Chart>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
 
-    <MudItem md="4">
-        <MudCard Outlined="true">
-            <MudCardContent>
-                <Chart Height="200" Config="_pricePerWorkerBarChartConfig" @ref="_pricePerWorkerBarChart"></Chart>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
+        <MudItem md="4">
+            <MudCard Outlined="true" Elevation="3">
+                <MudCardContent>
+                    <Chart Height="200" Config="_pricePerProductCostPieChartConfig" @ref="_pricePerProductCostPieChart"></Chart>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
 
-    <MudItem md="6">
-        <MudCard Outlined="true">
-            <MudCardContent>
-                <Chart Config="_costPerProductLineChartConfig" @ref="_costPerProductLineChart"></Chart>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
+        <MudItem md="4">
+            <MudCard Outlined="true">
+                <MudCardContent>
+                    <Chart Height="200" Config="_pricePerWorkerBarChartConfig" @ref="_pricePerWorkerBarChart"></Chart>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
 
-    <MudItem md="6">
-        <MudCard Outlined="true">
-            <MudCardContent>
-                <Chart Config="_costPerWorkerLineChartConfig" @ref="_costPerWorkerLineChart"></Chart>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
+        <MudItem md="6">
+            <MudCard Outlined="true">
+                <MudCardContent>
+                    <Chart Config="_costPerProductLineChartConfig" @ref="_costPerProductLineChart"></Chart>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
 
-    <MudItem md="6">
-        <MudCard Outlined="true">
-            <MudTable Items="@OngoingOrders.Take(5)" Hover="true" Breakpoint="Breakpoint.Md">
-                <HeaderContent>
-                    <MudTh>Object Number</MudTh>
-                    <MudTh>Address</MudTh>
-                    <MudTh>Start date</MudTh>
-                    <MudTh>Total hrs</MudTh>
-                    <MudTh>Expenses</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="Object Number">@context.ObjectNumber</MudTd>
-                    <MudTd DataLabel="Address">@context.Address</MudTd>
-                    <MudTd DataLabel="Start date">@context.StartDate?.ToShortDateString()</MudTd>
-                    <MudTd DataLabel="Total hrs">150h</MudTd>
-                    <MudTd DataLabel="Expenses">@CalculateTotalPriceForOrder(context.OrderId) SEK</MudTd>
-                </RowTemplate>
-            </MudTable>
-        </MudCard>
-    </MudItem>
-
-    <MudItem md="6">
-        <MudCard Outlined="true">
-            <MudTable Items="@UpcomingOrders.Take(5)" Hover="true" Breakpoint="Breakpoint.Md">
-                <HeaderContent>
-                    <MudTh>Object Number</MudTh>
-                    <MudTh>Address</MudTh>
-                    <MudTh>Description</MudTh>
-                    <MudTh>Start date</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="Object Number">@context.ObjectNumber</MudTd>
-                    <MudTd DataLabel="Address">@context.Address</MudTd>
-                    <MudTd DataLabel="Description">@context.Description</MudTd>
-                    <MudTd DataLabel="Start date">@context.StartDate</MudTd>
-                </RowTemplate>
-            </MudTable>
-        </MudCard>
-
-    </MudItem>
-</MudGrid>
+        <MudItem md="6">
+            <MudCard Outlined="true">
+                <MudCardContent>
+                    <Chart Config="_costPerWorkerLineChartConfig" @ref="_costPerWorkerLineChart"></Chart>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+}

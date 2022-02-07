@@ -1,0 +1,57 @@
+﻿@page "/products"
+@inherits ProductListBase
+
+@if (ProductList == null)
+{
+    <SpinKitCircle/>
+}
+else
+{
+    <MudTable Items="@ProductList"
+              Bordered="true"
+              Striped="true"
+              Dense="true"
+              FixedHeader="true"
+              Height="650px">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Products</MudText>
+            <MudButton
+                StartIcon="@Icons.Filled.AddCircleOutline"
+                Color="Color.Success"
+                Size="Size.Medium">
+                Create
+            </MudButton>
+            <MudSpacer/>
+            <MudTextField
+                @bind-Value="searchString"
+                Placeholder="Search"
+                Adornment="Adornment.Start"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium"
+                Class="mt-0">
+            </MudTextField>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Type</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh>Delete</MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.Type</MudTd>
+            <MudTd DataLabel="Company">@context.Description</MudTd>
+            <MudTd DataLabel="Delete">
+                <MudIconButton
+                    OnClick="@(async () => await DeleteProductAsync(context.ProductId))"
+                    Icon="@Icons.Material.Filled.Delete"
+                    aria-label="delete"/>
+            </MudTd>
+        </RowTemplate>
+        
+        <PagerContent>
+            <MudTablePager/>
+        </PagerContent>
+
+    </MudTable>
+}

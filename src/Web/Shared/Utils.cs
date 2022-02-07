@@ -8,10 +8,11 @@ namespace Web.Shared
     {
         public static class ChartColors
         {
-            private static readonly Lazy<IReadOnlyList<Color>> _all = new(() => new Color[7]
-            {
-                Red, Orange, Yellow, Green, Blue, Purple, Grey,
-            });
+            private static readonly Lazy<IReadOnlyList<Color>> _all = new(
+                () => new Color[7]
+                {
+                    Red, Orange, Yellow, Green, Blue, Purple, Grey,
+                });
 
             public static IReadOnlyList<Color> All => _all.Value;
 

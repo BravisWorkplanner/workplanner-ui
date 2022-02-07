@@ -1,76 +1,60 @@
 ﻿@page "/workers/{Id:int}"
-@using System.Threading
-@using System.Net.Http.Json
-@using APIClient.Model
 @using Microsoft.AspNetCore.Components
+@inherits WorkerEditBase
 
 @if (WorkerGetResult == null)
 {
-    <p>Loading...</p>
+    <SpinKitDoubleBounce/>
 }
 else
 {
-    <EditForm Model="@WorkerGetResult"
-              OnValidSubmit="@OnValidSubmit"
-              OnInvalidSubmit="@OnInvalidSubmit">
-        
-        <div class="container-fluid">
+    <MudGrid>
+        <MudItem xs="4">
+            <EditForm Model="@WorkerGetResult"
+                      OnValidSubmit="@OnValidSubmit">
+                <DataAnnotationsValidator/>
 
-            <div class="row">
-                <div class="col-4">
+                <MudCard>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h5">Details for @WorkerGetResult.WorkerId</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
 
-                    <h2>Editing worker with id: @Id</h2>
+                    <MudCardContent>
+                        <MudTextField Label="Name"
+                                      HelperText="Name of the worker"
+                                      @bind-Value="@WorkerGetResult.Name"
+                                      For="@(() => WorkerGetResult.Name)"/>
 
-                    <div class="form-group">
-                        <label for="workerNameInput">Name</label>
-                        <InputText @bind-Value="@WorkerGetResult.Name" id="workerNameInput" class="form-control" Placeholder="Enter name"></InputText>
-                    </div>
+                        <MudTextField Label="Company"
+                                      Class="mt-4"
+                                      HelperText="Company of the worker"
+                                      @bind-Value="@WorkerGetResult.Company"
+                                      For="@(() => WorkerGetResult.Company)"/>
 
-                    <div class="form-group">
-                        <label for="workerEmailInput">Email</label>
-                        <InputText @bind-Value="@WorkerGetResult.Email" id="workerEmailInput" class="form-control" Placeholder="Enter email"></InputText>
-                    </div>
+                        <MudTextField Label="Phone number"
+                                      Class="mt-4"
+                                      HelperText="Phone number of the worker"
+                                      @bind-Value="@WorkerGetResult.PhoneNumber"
+                                      For="@(() => WorkerGetResult.PhoneNumber)"/>
+                    </MudCardContent>
 
-                    <div class="form-group">
-                        <label for="workerPhoneNumberInput">Phone number</label>
-                        <InputText @bind-Value="@WorkerGetResult.PhoneNumber" id="workerPhoneNumberInput" class="form-control" Placeholder="Enter phone number"></InputText>
-                    </div>
+                    <MudCardActions>
+                        <MudButton
+                            ButtonType="ButtonType.Submit"
+                            Variant="Variant.Filled"
+                            StartIcon="@Icons.Material.Filled.Save"
+                            Color="Color.Info"
+                            Size="Size.Large"
+                            class="ml-auto">
+                            Save
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
 
-                </div>
-            </div>
-            <button type="submit" class="btn btn-success">Save</button>
+            </EditForm>
 
-        </div>
-    </EditForm>
-}
-
-
-@code {
-
-    private WorkerUpdateRequest _workerUpdateRequest;
-
-    [Parameter]
-    public int Id { get; set; }
-
-    [Inject]
-    public IHttpClientFactory HttpClientFactory { get; set; }
-
-    protected WorkerGetResult WorkerGetResult { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        var client = HttpClientFactory.CreateClient();
-        WorkerGetResult = await client.GetFromJsonAsync<WorkerGetResult>("https://localhost:5001/api/v1/workers/" + Id, CancellationToken.None);
-    }
-
-    protected async Task OnValidSubmit()
-    {
-        // map to order update request and send api call
-    }
-
-    protected async Task OnInvalidSubmit()
-    {
-        //  display some error
-    }
-
+        </MudItem>
+    </MudGrid>
 }
