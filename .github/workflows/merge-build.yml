@@ -1,0 +1,50 @@
+name: .Net 5 Merge and deploy
+
+on:
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: workplanner-api
+  Database:ConnectionString: ${{ secrets.SQL_CONNECTIONSTRING }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Merge build
+    steps:
+    - name: Az login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Restore Dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test --configuration Release --no-build --verbosity normal
+
+    - name: Publish
+      run: |
+        dotnet publish src/API/API.csproj -c Release -o app
+    
+    - name: Deploy to Azure WebApp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: './app'
+
+    - name: AZ logout
+      run: |
+        az logout
