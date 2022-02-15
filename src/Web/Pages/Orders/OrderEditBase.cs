@@ -32,6 +32,9 @@ namespace Web.Pages.Orders
         [Inject]
         public ILogger<OrderEdit> Logger { get; set; }
 
+        [Inject]
+        IPdfGenerator PdfGenerator { get; set; }
+
         protected OrderGetResult OrderGetResult { get; set; }
 
         protected override async Task OnInitializedAsync()
@@ -179,7 +182,7 @@ namespace Web.Pages.Orders
                 await LoadOrderDataAsync();
             }
         }
-        
+
         protected void GenerateWorkOrder()
         {
             var order = new OrderPdfDocument(OrderGetResult);

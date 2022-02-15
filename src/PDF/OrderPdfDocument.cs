@@ -1,5 +1,6 @@
 using System.Reflection;
 using API.Contracts;
+using EnsureThat;
 
 namespace PDF;
 
@@ -25,11 +26,16 @@ public class OrderPdfDocument
 
     public OrderPdfDocument(OrderGetResult order)
     {
-        // validate which fields are required
+        EnsureArg.IsNotNullOrWhiteSpace(order.ObjectNumber, nameof(order.ObjectNumber));
+        EnsureArg.IsNotNullOrWhiteSpace(order.Address, nameof(order.Address));
+        EnsureArg.IsNotNullOrWhiteSpace(order.CustomerName, nameof(order.CustomerName));
+        EnsureArg.IsNotNull(order.StartDate, nameof(order.StartDate));
+        EnsureArg.IsNotNullOrWhiteSpace(order.CustomerPhoneNumber, nameof(order.CustomerPhoneNumber));
+
         ObjectNumber = order.ObjectNumber;
         Address = order.Address;
         Customer = order.CustomerName;
-        Date = order.StartDate?.ToShortDateString();
+        Date = order.StartDate.Value.ToShortDateString();
         PhoneNumber = order.CustomerPhoneNumber;
         Ref = "???";
     }

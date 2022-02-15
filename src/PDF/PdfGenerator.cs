@@ -3,14 +3,27 @@ using System.Runtime.CompilerServices;
 using API.Contracts;
 using iText.Forms;
 using iText.Kernel.Pdf;
+using Microsoft.Extensions.Logging;
 
 namespace PDF;
 
-public class PdfGenerator
+public class PdfGenerator : IPdfGenerator
 {
-    public static string GenerateOrderPdfDocument(OrderPdfDocument order)
+    private readonly ILogger<PdfGenerator> _logger;
+
+    public PdfGenerator(ILogger<PdfGenerator> logger)
     {
-        var filePath = GetPdfTemplateFilePath();
+        if (logger == null)
+        {
+            throw new ArgumentNullException(nameof(logger));
+        }
+
+        _logger = logger;
+    }
+    
+    public string GenerateOrderPdfDocument(OrderPdfDocument order)
+    {
+        var filePath = GetPdfTemplateFilePath("ARBETSORDER.pdf");
         if (string.IsNullOrEmpty(filePath))
         {
             return string.Empty;
@@ -25,14 +38,16 @@ public class PdfGenerator
                 Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + ".pdf");
             using var pdfWriter = new PdfWriter(outputName);
             using var pdfDocument = new PdfDocument(pdfReader, pdfWriter);
+            
             var form = PdfAcroForm.GetAcroForm(pdfDocument, true);
+            
             var properties = typeof(OrderPdfDocument)
                              .GetProperties()
                              .Where(x => x.GetCustomAttribute<OrderPdfFieldNameAttribute>() != null);
 
             foreach (var property in properties)
             {
-                var fieldName = property.GetCustomAttribute<OrderPdfFieldNameAttribute>().FieldName;
+                var fieldName = property.GetCustomAttribute<OrderPdfFieldNameAttribute>()?.FieldName;
                 if (string.IsNullOrEmpty(fieldName))
                 {
                     continue;
@@ -57,20 +72,21 @@ public class PdfGenerator
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError(e, e.Message);
         }
 
         return string.Empty;
     }
 
-    private static string GetPdfTemplateFilePath()
+    private string GetPdfTemplateFilePath(string orderTemplatePdfName)
     {
         var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
         var directory = new DirectoryInfo(baseDirectory);
-        var fileList = directory.GetFiles("ARBETSORDER.pdf", System.IO.SearchOption.AllDirectories);
+        var fileList = directory.GetFiles(orderTemplatePdfName, System.IO.SearchOption.AllDirectories);
+        
         if (fileList.Length != 1)
         {
-            // more than 1 file found, should return error
+            _logger.LogWarning($"More than 1 ({fileList.Length}) file with template file name {orderTemplatePdfName} was found.");
             return string.Empty;
         }
 
