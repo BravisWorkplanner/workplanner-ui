@@ -17,4 +17,8 @@
         <ProjectReference Include="..\PDF\PDF.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Pages\Settings\Settings.razor" />
+    </ItemGroup>
+
 </Project>

@@ -18,22 +18,22 @@ namespace Web.Pages.Orders
         public int Id { get; set; }
 
         [Inject]
-        IAPIClient APIClient { get; set; }
+        private IAPIClient APIClient { get; set; }
 
         [Inject]
-        ISnackbar Snackbar { get; set; }
+        private ISnackbar Snackbar { get; set; }
 
         [Inject]
-        NavigationManager NavigationManager { get; set; }
+        private NavigationManager NavigationManager { get; set; }
 
         [Inject]
-        IDialogService DialogService { get; set; }
+        private IDialogService DialogService { get; set; }
 
         [Inject]
         public ILogger<OrderEdit> Logger { get; set; }
 
         [Inject]
-        IPdfGenerator PdfGenerator { get; set; }
+        private IPdfGenerator PdfGenerator { get; set; }
 
         protected OrderGetResult OrderGetResult { get; set; }
 
@@ -185,6 +185,8 @@ namespace Web.Pages.Orders
 
         protected void GenerateWorkOrder()
         {
+            Logger.LogInformation("Creating order pdf for order {OrderId}", Id);
+
             var order = new OrderPdfDocument(OrderGetResult);
             var result = PdfGenerator.GenerateOrderPdfDocument(order);
             if (string.IsNullOrEmpty(result))
