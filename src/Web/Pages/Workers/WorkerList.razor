@@ -10,66 +10,69 @@
 }
 else
 {
-    <MudTable Items="@WorkerList.Take(20)"
-              Bordered="true"
-              Striped="true"
-              Dense="true"
-              Filter="new Func<WorkerListResult, bool>(FilterFunc)"
-              FixedHeader="true"
-              Height="650px">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Workers</MudText>
-            <MudButton
-                            StartIcon="@Icons.Filled.AddCircleOutline"
-                            OnClick="OpenCreateWorkerDialogAsync"
-                            Color="Color.Success"
-                            Size="Size.Medium">
-                            Create
-                        </MudButton>
-            <MudSpacer/>
-            <MudTextField @bind-Value="searchString"
-                          Placeholder="Search"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          IconSize="Size.Medium"
-                          Class="mt-0">
-            </MudTextField>
-        </ToolBarContent>
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="8">
+            <MudTable Items="@WorkerList.Take(20)"
+                      Bordered="true"
+                      Striped="true"
+                      Dense="true"
+                      Filter="new Func<WorkerListResult, bool>(FilterFunc)"
+                      FixedHeader="true">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Workers</MudText>
+                    <MudButton
+                        StartIcon="@Icons.Filled.AddCircleOutline"
+                        OnClick="OpenCreateWorkerDialogAsync"
+                        Color="Color.Success"
+                        Size="Size.Medium">
+                        Create
+                    </MudButton>
+                    <MudSpacer/>
+                    <MudTextField @bind-Value="searchString"
+                                  Placeholder="Search"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  IconSize="Size.Medium"
+                                  Class="mt-0">
+                    </MudTextField>
+                </ToolBarContent>
 
-        <HeaderContent>
-            <MudTh>
-                <MudTableSortLabel SortBy="new Func<WorkerListResult, object>(x => x.Name)">Name</MudTableSortLabel>
-            </MudTh>
-            <MudTh>
-                <MudTableSortLabel SortBy="new Func<WorkerListResult, object>(x => x.Company)">Company</MudTableSortLabel>
-            </MudTh>
-            <MudTh>
-                <MudTableSortLabel SortBy="new Func<WorkerListResult, object>(x => x.PhoneNumber)">Phone number</MudTableSortLabel>
-            </MudTh>
-            <MudTh>Edit</MudTh>
-            <MudTh>Delete</MudTh>
-        </HeaderContent>
+                <HeaderContent>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<WorkerListResult, object>(x => x.Name)">Name</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<WorkerListResult, object>(x => x.Company)">Company</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<WorkerListResult, object>(x => x.PhoneNumber)">Phone number</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>Edit</MudTh>
+                    <MudTh>Delete</MudTh>
+                </HeaderContent>
 
-        <RowTemplate>
-            <MudTd DataLabel="Name">@context.Name</MudTd>
-            <MudTd DataLabel="Company">@context.Company</MudTd>
-            <MudTd DataLabel="Phone number">@context.PhoneNumber</MudTd>
-            @{ var uri = $"/workers/{context.WorkerId}"; }
-            <MudTd DataLabel="Edit">
-                <MudLink Href="@uri">
-                    <MudIcon Icon="@Icons.Material.Filled.Edit" Title="Edit"/>
-                </MudLink>
-            </MudTd>
-            <MudTd DataLabel="Delete">
-                <MudIconButton
-                    OnClick="@(async () => await DeleteWorkerAsync(context.WorkerId))"
-                    Icon="@Icons.Material.Filled.Delete"
-                    aria-label="delete"/>
-            </MudTd>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager/>
-        </PagerContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">@context.Name</MudTd>
+                    <MudTd DataLabel="Company">@context.Company</MudTd>
+                    <MudTd DataLabel="Phone number">@context.PhoneNumber</MudTd>
+                    @{ var uri = $"/workers/{context.WorkerId}"; }
+                    <MudTd DataLabel="Edit">
+                        <MudLink Href="@uri">
+                            <MudIcon Icon="@Icons.Material.Filled.Edit" Title="Edit"/>
+                        </MudLink>
+                    </MudTd>
+                    <MudTd DataLabel="Delete">
+                        <MudIconButton
+                            OnClick="@(async () => await DeleteWorkerAsync(context.WorkerId))"
+                            Icon="@Icons.Material.Filled.Delete"
+                            aria-label="delete"/>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager/>
+                </PagerContent>
 
-    </MudTable>
+            </MudTable>
+        </MudItem>
+    </MudGrid>
 }

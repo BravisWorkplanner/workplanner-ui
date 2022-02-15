@@ -21,9 +21,10 @@
 </MudDialog>
 
 @code {
-    private OrderCreateRequest order = new ();
+    private OrderCreateRequest order = new();
 
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
 
     void Submit() => MudDialog.Close(DialogResult.Ok(order));
 

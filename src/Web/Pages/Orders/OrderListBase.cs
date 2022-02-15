@@ -47,9 +47,7 @@ namespace Web.Pages.Orders
                 return;
             }
 
-            var result = await APIClient.HandleHttpCallAsync(
-                () => APIClient.Order_DeleteAsync(orderId),
-                Logger);
+            var result = await APIClient.HandleHttpCallAsync(() => APIClient.Order_DeleteAsync(orderId), Logger);
             if (!result.Success)
             {
                 Snackbar.Add($"Error when deleting order {orderId}", Severity.Error);
@@ -78,9 +76,7 @@ namespace Web.Pages.Orders
             }
 
             var order = await dialogResult.GetReturnValueAsync<OrderCreateRequest>();
-            var orderCreateResult = await APIClient.HandleHttpCallAsync(
-                () => APIClient.Order_CreateAsync(order),
-                Logger);
+            var orderCreateResult = await APIClient.HandleHttpCallAsync(() => APIClient.Order_CreateAsync(order), Logger);
             if (!orderCreateResult.Success)
             {
                 Snackbar.Add("Error occurred when creating order", Severity.Error);

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using API;
 using API.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
+using Web.Pages.Products.Components;
 
 namespace Web.Pages.Products;
 
@@ -44,6 +46,35 @@ public class ProductListBase : ComponentBase
         ProductList = products.Data;
     }
 
+    protected async Task OpenCreateProductDialogAsync()
+    {
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraSmall,
+        };
+
+        var dialogResult = DialogService.Show<CreateProductDialog>("Create product", options);
+        var result = await dialogResult.Result;
+        if (result.Cancelled)
+        {
+            return;
+        }
+
+        var product = await dialogResult.GetReturnValueAsync<ProductCreateRequest>();
+        var productCreateResult = await APIClient.HandleHttpCallAsync(() => APIClient.Product_CreateAsync(product), Logger);
+        if (!productCreateResult.Success)
+        {
+            Snackbar.Add("Error occurred when creating product", Severity.Error);
+        }
+        else
+        {
+            Snackbar.Add($"Product {productCreateResult.Data} was successfully created", Severity.Success);
+            await FetchDataFromServerAsync();
+        }
+    }
+
     protected async Task DeleteProductAsync(int productId)
     {
         var dialogResult = await DialogService.ShowMessageBox(
@@ -67,5 +98,25 @@ public class ProductListBase : ComponentBase
 
         Snackbar.Add($"Product {result.Data} was successfully deleted", Severity.Success);
         await FetchDataFromServerAsync();
+    }
+    
+    protected bool FilterFunc(ProductListResult product)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            return true;
+        }
+
+        if (product.Type.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (product.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return false;
     }
 }

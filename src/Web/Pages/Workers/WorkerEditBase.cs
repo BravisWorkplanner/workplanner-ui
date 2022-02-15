@@ -1,12 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-
 using API;
 using API.Contracts;
-
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
-
 using MudBlazor;
 
 namespace Web.Pages.Workers
@@ -27,7 +24,8 @@ namespace Web.Pages.Workers
         [Inject]
         NavigationManager NavigationManager { get; set; }
 
-        [Inject] ILogger<WorkerEdit> Logger { get; set; }
+        [Inject]
+        ILogger<WorkerEdit> Logger { get; set; }
 
         protected WorkerGetResult WorkerGetResult { get; set; }
 

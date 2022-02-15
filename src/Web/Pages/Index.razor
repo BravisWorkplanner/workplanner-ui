@@ -118,27 +118,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var orders = await APIClient.HandleHttpCallAsync(
-            () => APIClient.Order_ListAsync(50, 1),
-            Logger);
+        var orders = await APIClient.HandleHttpCallAsync(() => APIClient.Order_ListAsync(50, 1), Logger);
         if (!orders.Success)
         {
             Snackbar.Add("Error loading orders. Please try again later.", Severity.Error);
             return;
         }
 
-        OnGoingOrders = orders.Data?
-                              .Where(x => x.OrderStatus == OrderStatus.OnGoing)
-                              .OrderByDescending(x => x.StartDate)
-                              .ToList();
+        OnGoingOrders = orders.Data?.Where(x => x.OrderStatus == OrderStatus.OnGoing).OrderByDescending(x => x.StartDate).ToList();
 
-        UpComingOrders = orders.Data?
-                               .Where(x => x.OrderStatus == OrderStatus.NotStarted &&
-                                           x.StartDate.HasValue &&
-                                           x.StartDate.Value > DateTime.UtcNow.AddDays(1) &&
-                                           x.StartDate.Value < DateTime.UtcNow.AddDays(7))
-                               .OrderByDescending(x => x.StartDate)
-                               .ToList();
+        UpComingOrders = orders.Data?.Where(x => x.OrderStatus == OrderStatus.NotStarted && x.StartDate.HasValue && x.StartDate.Value > DateTime.UtcNow.AddDays(1) && x.StartDate.Value < DateTime.UtcNow.AddDays(7)).OrderByDescending(x => x.StartDate).ToList();
 
         isLoading = false;
     }

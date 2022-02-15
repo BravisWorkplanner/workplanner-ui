@@ -30,7 +30,7 @@
                        Required="true"
                        RequiredError="Worker must be selected."
                        AnchorOrigin="Origin.BottomCenter"
-                       Validation="@(new Func<int, string>(x => x != 0 ? null : "Please provide valid worker" ))">
+                       Validation="@(new Func<int, string>(x => x != 0 ? null : "Please provide valid worker"))">
                 @foreach (var item in workers)
                 {
                     <MudSelectItem Value="@item.WorkerId">@item.Name</MudSelectItem>

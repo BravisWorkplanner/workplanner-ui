@@ -5,6 +5,7 @@ using API.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
+using PDF;
 using Web.Pages.Orders.Components;
 
 namespace Web.Pages.Orders
@@ -17,19 +18,22 @@ namespace Web.Pages.Orders
         public int Id { get; set; }
 
         [Inject]
-        IAPIClient APIClient { get; set; }
+        private IAPIClient APIClient { get; set; }
 
         [Inject]
-        ISnackbar Snackbar { get; set; }
+        private ISnackbar Snackbar { get; set; }
 
         [Inject]
-        NavigationManager NavigationManager { get; set; }
+        private NavigationManager NavigationManager { get; set; }
 
         [Inject]
-        IDialogService DialogService { get; set; }
+        private IDialogService DialogService { get; set; }
 
         [Inject]
         public ILogger<OrderEdit> Logger { get; set; }
+
+        [Inject]
+        private IPdfGenerator PdfGenerator { get; set; }
 
         protected OrderGetResult OrderGetResult { get; set; }
 
@@ -82,7 +86,7 @@ namespace Web.Pages.Orders
                 NavigationManager.NavigateTo("/orders");
             }
         }
-        
+
         protected async Task DeleteOrderAsync(int id)
         {
             var dialogResult = await DialogService.ShowMessageBox(
@@ -96,9 +100,7 @@ namespace Web.Pages.Orders
                 return;
             }
 
-            var result = await APIClient.HandleHttpCallAsync(
-                () => APIClient.Order_DeleteAsync(id),
-                Logger);
+            var result = await APIClient.HandleHttpCallAsync(() => APIClient.Order_DeleteAsync(id), Logger);
             if (!result.Success)
             {
                 Snackbar.Add($"Error when deleting order {id}", Severity.Error);
@@ -143,7 +145,7 @@ namespace Web.Pages.Orders
                 await LoadOrderDataAsync();
             }
         }
-        
+
         protected async Task OpenCreateTimeRegistrationDialogAsync()
         {
             var options = new DialogOptions
@@ -155,7 +157,10 @@ namespace Web.Pages.Orders
 
             var dialogParameters = new DialogParameters { { "OrderId", Id } };
 
-            var dialogResult = DialogService.Show<CreateTimeRegistrationDialog>("Create time registration", dialogParameters, options);
+            var dialogResult = DialogService.Show<CreateTimeRegistrationDialog>(
+                "Create time registration",
+                dialogParameters,
+                options);
             var result = await dialogResult.Result;
             if (result.Cancelled)
             {
@@ -175,6 +180,22 @@ namespace Web.Pages.Orders
             {
                 Snackbar.Add($"Expense {timeRegistrationResult.Data} was successfully created", Severity.Success);
                 await LoadOrderDataAsync();
+            }
+        }
+
+        protected void GenerateWorkOrder()
+        {
+            Logger.LogInformation("Creating order pdf for order {OrderId}", Id);
+
+            var order = new OrderPdfDocument(OrderGetResult);
+            var result = PdfGenerator.GenerateOrderPdfDocument(order);
+            if (string.IsNullOrEmpty(result))
+            {
+                Snackbar.Add("Error occurred when creating order pdf", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add($"Order pdf was created at '{result}'", Severity.Success);
             }
         }
     }

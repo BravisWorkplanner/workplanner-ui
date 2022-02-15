@@ -10,91 +10,80 @@
 }
 else
 {
-    <MudTable Items="@OrderList.Take(20)"
-              Bordered="true"
-              Striped="true"
-              FixedHeader="true"
-              Dense="true"
-              Filter="new Func<OrderListResult, bool>(FilterFunc)"
-              Height="650px">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Orders</MudText>
-            <MudButton
-                StartIcon="@Icons.Filled.AddCircleOutline"
-                OnClick="OpenCreateOrderDialogAsync"
-                Color="Color.Success"
-                Size="Size.Medium">
-                Create
-            </MudButton>
-            <MudSpacer/>
-            <MudTextField @bind-Value="searchString"
-                          Placeholder="Search"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          IconSize="Size.Medium"
-                          Class="mt-0">
-            </MudTextField>
-        </ToolBarContent>
-        <HeaderContent>
-            <MudTh>
-                <MudTableSortLabel
-                    SortBy="new Func<OrderListResult, object>(x => x.ObjectNumber)">
-                    Order
-                </MudTableSortLabel>
-            </MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh>Address</MudTh>
-            <MudTh>
-                <MudTableSortLabel SortBy="new Func<OrderListResult, object>(x => x.OrderStatus)">Status</MudTableSortLabel>
-            </MudTh>
-            <MudTh>
-                <MudTableSortLabel
-                    SortBy="new Func<OrderListResult, object>(x => x.StartDate)">
-                    Start date
-                </MudTableSortLabel>
-            </MudTh>
-            <MudTh>
-                <MudTableSortLabel
-                    SortBy="new Func<OrderListResult, object>(x => x.EndDate)">
-                    End date
-                </MudTableSortLabel>
-            </MudTh>
-            <MudTh>
-                <MudTableSortLabel
-                    SortBy="new Func<OrderListResult, object>(x => x.InvoiceDate)">
-                    Invoice date
-                </MudTableSortLabel>
-            </MudTh>
-            <MudTh>Edit</MudTh>
-            <MudTh>Delete</MudTh>
-        </HeaderContent>
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="10">
+            <MudTable Items="@OrderList.Take(20)"
+                      Bordered="true"
+                      Striped="true"
+                      FixedHeader="true"
+                      Dense="true"
+                      Filter="new Func<OrderListResult, bool>(FilterFunc)">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Orders</MudText>
+                    <MudButton
+                        StartIcon="@Icons.Filled.AddCircleOutline"
+                        OnClick="OpenCreateOrderDialogAsync"
+                        Color="Color.Success"
+                        Size="Size.Medium">
+                        Create
+                    </MudButton>
+                    <MudSpacer/>
+                    <MudTextField @bind-Value="searchString"
+                                  Placeholder="Search"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  IconSize="Size.Medium"
+                                  Class="mt-0">
+                    </MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh>
+                        <MudTableSortLabel
+                            SortBy="new Func<OrderListResult, object>(x => x.ObjectNumber)">
+                            Order
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>Description</MudTh>
+                    <MudTh>Address</MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<OrderListResult, object>(x => x.OrderStatus)">Status</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel
+                            SortBy="new Func<OrderListResult, object>(x => x.StartDate)">
+                            Start date
+                        </MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>Edit</MudTh>
+                    <MudTh>Delete</MudTh>
+                </HeaderContent>
 
-        <RowTemplate>
-            <MudTd DataLabel="Object number">@context.ObjectNumber</MudTd>
-            <MudTd DataLabel="Description">@context.Description</MudTd>
-            <MudTd DataLabel="Address">@context.Address</MudTd>
-            <MudTd DataLabel="Order status">@context.OrderStatus</MudTd>
-            <MudTd DataLabel="Start date">@context.StartDate?.ToShortDateString()</MudTd>
-            <MudTd DataLabel="End date">@context.EndDate?.ToShortDateString()</MudTd>
-            <MudTd DataLabel="Invoice date">@context.InvoiceDate?.ToShortDateString()</MudTd>
-            @{
-                var uri = $"/orders/{context.OrderId}";
-            }
-            <MudTd DataLabel="Edit">
-                <MudLink Href="@uri">
-                    <MudIcon Icon="@Icons.Material.Filled.Edit" Title="Edit"/>
-                </MudLink>
-            </MudTd>
-            <MudTd DataLabel="Delete">
-                <MudIconButton OnClick="@(async () => await DeleteOrderAsync(context.OrderId))"
-                               Icon="@Icons.Material.Filled.Delete"
-                               aria-label="delete"/>
-            </MudTd>
-        </RowTemplate>
-        <PagerContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Object number">@context.ObjectNumber</MudTd>
+                    <MudTd DataLabel="Description">@context.Description</MudTd>
+                    <MudTd DataLabel="Address">@context.Address</MudTd>
+                    <MudTd DataLabel="Order status">@context.OrderStatus</MudTd>
+                    <MudTd DataLabel="Start date">@context.StartDate?.ToShortDateString()</MudTd>
+                    @{
+                        var uri = $"/orders/{context.OrderId}";
+                    }
+                    <MudTd DataLabel="Edit">
+                        <MudLink Href="@uri">
+                            <MudIcon Icon="@Icons.Material.Filled.Edit" Title="Edit"/>
+                        </MudLink>
+                    </MudTd>
+                    <MudTd DataLabel="Delete">
+                        <MudIconButton OnClick="@(async () => await DeleteOrderAsync(context.OrderId))"
+                                       Icon="@Icons.Material.Filled.Delete"
+                                       aria-label="delete"/>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
 
-            <MudTablePager/>
-        </PagerContent>
+                    <MudTablePager/>
+                </PagerContent>
 
-    </MudTable>
+            </MudTable>
+        </MudItem>
+    </MudGrid>
 }

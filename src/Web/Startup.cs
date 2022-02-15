@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MudBlazor;
 using MudBlazor.Services;
+using PDF;
 
 namespace Web
 {
@@ -41,6 +42,8 @@ namespace Web
                     config.SnackbarConfiguration.ShowTransitionDuration = 500;
                     config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
                 });
+            
+            services.AddTransient<IPdfGenerator, PdfGenerator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
