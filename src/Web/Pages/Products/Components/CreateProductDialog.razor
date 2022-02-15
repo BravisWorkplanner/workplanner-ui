@@ -1,0 +1,29 @@
+﻿@using API.Contracts
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1"/>
+            Create new product
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@product.Type" Label="Type"/>
+        <MudTextField @bind-Value="@product.Description" Label="Description"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Create product</MudButton>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    private ProductCreateRequest product = new();
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(product));
+
+    void Cancel() => MudDialog.Cancel();
+}

@@ -25,17 +25,7 @@ public static class APIClientExtensions
         }
         catch (ApiException<ProblemDetails> ex)
         {
-            var error = ex.Result.Title;
-            if (ex.Result.AdditionalProperties.TryGetValue("errors", out var errors))
-            {
-                var dict = JObject.FromObject(errors).ToObject<Dictionary<string, object>>();
-                if (dict != null)
-                {
-                    var validationErrors = string.Join(',', dict.Select(x => string.Concat(x.Key, ':', x.Value)));
-                    error = $"{error} Validation errors: {validationErrors}";
-                }
-            }
-
+            var error = ExtractErrorFromTypeException<T>(ex);
             logger.LogError(error);
             return new Result<T>(ex.StatusCode, ex.Response);
         }
@@ -50,5 +40,21 @@ public static class APIClientExtensions
 
             return new Result<T>((int)HttpStatusCode.InternalServerError, "Internal server error");
         }
+    }
+
+    private static string ExtractErrorFromTypeException<T>(ApiException<ProblemDetails> ex)
+    {
+        var error = ex.Result.Title;
+        if (ex.Result.AdditionalProperties.TryGetValue("errors", out var errors))
+        {
+            var dict = JObject.FromObject(errors).ToObject<Dictionary<string, object>>();
+            if (dict != null)
+            {
+                var validationErrors = string.Join(',', dict.Select(x => string.Concat(x.Key, ':', x.Value)));
+                error = $"{error} Validation errors: {validationErrors}";
+            }
+        }
+
+        return error;
     }
 }

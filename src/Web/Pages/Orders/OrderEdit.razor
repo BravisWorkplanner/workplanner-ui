@@ -31,7 +31,7 @@ else
                                 </MudItem>
 
                                 <MudItem xs="4">
-                                    <MudText Typo="Typo.h5" >Current</MudText>
+                                    <MudText Typo="Typo.h5">Current</MudText>
                                     <MudText Typo="Typo.h6">@Math.Round(@OrderGetResult.Expenses.Sum(x => x.Price), 2) SEK</MudText>
                                     <MudText Typo="Typo.h6">@OrderGetResult.TimeRegistrations.Sum(x => x.Hours) hrs</MudText>
                                 </MudItem>
@@ -92,6 +92,14 @@ else
 
                     <MudCardActions Style="justify-content: flex-end">
                         <MudButton
+                            OnClick="@(() => GenerateWorkOrder())"
+                            StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                            Color="Color.Tertiary"
+                            Size="Size.Large">
+                            Create pdf
+                        </MudButton>
+                        <MudButton
+                            Style="margin-left: 10px"
                             OnClick="@(() => DeleteOrderAsync(Id))"
                             Variant="Variant.Filled"
                             StartIcon="@Icons.Material.Filled.Delete"

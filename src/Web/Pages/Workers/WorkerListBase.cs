@@ -46,9 +46,7 @@ namespace Web.Pages.Workers
                 return;
             }
 
-            var result = await APIClient.HandleHttpCallAsync(
-                () => APIClient.Worker_DeleteAsync(workerId),
-                Logger);
+            var result = await APIClient.HandleHttpCallAsync(() => APIClient.Worker_DeleteAsync(workerId), Logger);
             if (!result.Success)
             {
                 Snackbar.Add($"Error deleting worker {workerId}", Severity.Error);
@@ -77,9 +75,7 @@ namespace Web.Pages.Workers
             }
 
             var worker = await dialogResult.GetReturnValueAsync<WorkerCreateRequest>();
-            var workerCreateResult = await APIClient.HandleHttpCallAsync(
-                () => APIClient.Worker_CreateAsync(worker),
-                Logger);
+            var workerCreateResult = await APIClient.HandleHttpCallAsync(() => APIClient.Worker_CreateAsync(worker), Logger);
             if (!workerCreateResult.Success)
             {
                 Snackbar.Add("Error occurred when creating worker", Severity.Error);
@@ -118,12 +114,11 @@ namespace Web.Pages.Workers
 
         protected async Task FetchDataFromServerAsync()
         {
-            var workers = await APIClient.HandleHttpCallAsync(
-                () => APIClient.Worker_ListAsync(20, 1),
-                Logger);
+            var workers = await APIClient.HandleHttpCallAsync(() => APIClient.Worker_ListAsync(20, 1), Logger);
             if (!workers.Success)
             {
                 Snackbar.Add("Error loading workers. Please try again later.", Severity.Error);
+
                 return;
             }
 
