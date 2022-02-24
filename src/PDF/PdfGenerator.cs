@@ -4,6 +4,7 @@ using iText.Forms;
 using iText.Kernel.Pdf;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Shared;
 
 namespace PDF;
 
@@ -20,58 +21,66 @@ public class PdfGenerator : IPdfGenerator
     {
         _logger = EnsureArg.IsNotNull(logger);
         _configuration = EnsureArg.IsNotNull(config);
+        ValidateFileConfiguration();
     }
 
     public string GenerateOrderPdfDocument(OrderPdfDocument order)
     {
-        var fileConfiguration = ValidateFileConfiguration();
+        var fileConfiguration = _configuration.GetSection(FileSettingsSection);
 
         try
         {
             var templateFilePath = FindTemplateFilePath(fileConfiguration[TemplateFilename]);
+            var outputPath = FindOutputFilePath(fileConfiguration[OutputPath], order.ObjectNumber);
+            
             using var pdfReader = new PdfReader(templateFilePath);
-            using var pdfWriter = new PdfWriter(fileConfiguration[OutputPath]);
+            using var pdfWriter = new PdfWriter(outputPath);
             using var pdfDocument = new PdfDocument(pdfReader, pdfWriter);
 
             var form = PdfAcroForm.GetAcroForm(pdfDocument, true);
 
-            var properties = typeof(OrderPdfDocument).GetProperties().
-                                                      Where(x => x.GetCustomAttribute<OrderPdfFieldNameAttribute>() != null);
-
-            foreach (var property in properties)
-            {
-                var fieldName = property.GetCustomAttribute<OrderPdfFieldNameAttribute>()?.FieldName;
-                if (string.IsNullOrEmpty(fieldName))
-                {
-                    continue;
-                }
-
-                var field = form.GetField(fieldName);
-                if (field == null)
-                {
-                    continue;
-                }
-
-                var value = property.GetValue(order);
-                if (value != null)
-                {
-                    field.SetValue((string)value);
-                }
-            }
-
+            ReplacePdfFormValues(order, form);
             pdfDocument.Close();
-
-            return templateFilePath;
+            return outputPath;
         }
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
+            throw;
         }
-
-        return string.Empty;
     }
 
-    private IConfiguration ValidateFileConfiguration()
+    private static void ReplacePdfFormValues(OrderPdfDocument order, PdfAcroForm form)
+    {
+        var properties = typeof(OrderPdfDocument)
+                         .GetProperties()
+                         .Where(x => x.GetCustomAttribute<OrderPdfFieldNameAttribute>() != null);
+
+        // TODO: Handle missing property values
+        // https://github.com/BravisWorkplanner/workplanner-ui/issues/9
+        foreach (var property in properties)
+        {
+            var fieldName = property.GetCustomAttribute<OrderPdfFieldNameAttribute>()?.FieldName;
+            if (string.IsNullOrEmpty(fieldName))
+            {
+                continue;
+            }
+
+            var field = form.GetField(fieldName);
+            if (field == null)
+            {
+                continue;
+            }
+
+            var value = property.GetValue(order);
+            if (value != null)
+            {
+                field.SetValue((string)value);
+            }
+        }
+    }
+
+    private void ValidateFileConfiguration()
     {
         var rootSection = _configuration.GetSection(FileSettingsSection); 
         if (!rootSection.Exists())
@@ -90,8 +99,6 @@ public class PdfGenerator : IPdfGenerator
         {
             throw new KeyNotFoundException($"Key or value {OutputPath} missing from configuration");
         }
-        
-        return rootSection;
     }
 
     private string FindTemplateFilePath(string orderTemplatePdfName)
@@ -102,12 +109,20 @@ public class PdfGenerator : IPdfGenerator
 
         if (fileList.Length != 1)
         {
-            _logger.LogWarning(
-                $"More than 1 ({fileList.Length}) file with template file name {orderTemplatePdfName} was found.");
-
-            return string.Empty;
+            throw new PdfException($"{fileList.Length} # of files were found with template file name {orderTemplatePdfName}");
         }
 
         return fileList[0].FullName;
+    }
+    
+    private string FindOutputFilePath(string outputFilePath, string orderObjectNumber)
+    {
+        var directory = new DirectoryInfo(outputFilePath);
+        if (!directory.Exists)
+        {
+            throw new PdfException($"Output file path: {outputFilePath} does not exist, please create folder on your system");
+        }
+        
+        return Path.Combine(directory.FullName, orderObjectNumber + ".pdf");
     }
 }
