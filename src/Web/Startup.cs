@@ -28,8 +28,13 @@ namespace Web
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddHttpClient();
-            services.AddHttpClient<IAPIClient, APIClient>(
-                client => client.BaseAddress = new Uri(Configuration["ApiServerAddress"]));
+            services.AddHttpClient<IAPIClient, APIClient>(client => client.BaseAddress = new Uri(Configuration["ApiServerAddress"]));
+            services.AddApplicationInsightsTelemetry(
+                config =>
+                {
+                    config.RequestCollectionOptions.TrackExceptions = true;
+                    config.ConnectionString = Configuration["ApplicationInsights:ConnectionString"];
+                });
             services.AddMudServices(
                 config =>
                 {
