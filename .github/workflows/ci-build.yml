@@ -33,15 +33,19 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     - name: Test
-      run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+      run: dotnet test --configuration Release --no-build --no-restore --settings testsettings.runsettings --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
 
-    - name: Copy Coverage To Predictable Location
-      run: cp -n coverage/**/coverage.cobertura.xml coverage/
+    - name: Convert code coverage reports to single file
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.0.4
+      with:
+        reports: coverage/**/coverage.cobertura.xml
+        targetdir: coveragereport
+        reporttypes: Cobertura
 
     - name: Code Coverage Summary Report
       uses: irongut/CodeCoverageSummary@v1.0.5
       with:
-        filename: coverage/coverage.cobertura.xml
+        filename: coveragereport/Cobertura.xml
         badge: true
         format: 'markdown'
         output: 'both'
