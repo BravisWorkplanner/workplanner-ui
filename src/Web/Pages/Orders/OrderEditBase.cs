@@ -1,4 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API;
 using API.Contracts;
@@ -6,6 +9,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
 using PDF;
+using Shared;
 using Web.Pages.Orders.Components;
 
 namespace Web.Pages.Orders
@@ -187,15 +191,18 @@ namespace Web.Pages.Orders
         {
             Logger.LogInformation("Creating order pdf for order {OrderId}", Id);
 
-            var order = new OrderPdfDocument(OrderGetResult);
-            var result = PdfGenerator.GenerateOrderPdfDocument(order);
-            if (string.IsNullOrEmpty(result))
+            try
+            {
+                var result = PdfGenerator.SaveOrderPdfDocument(OrderGetResult);
+                Snackbar.Add($"Order pdf was created at '{result}'", Severity.Success);
+            }
+            catch (PdfException exception)
+            {
+                Snackbar.Add(exception.Message, Severity.Warning);
+            }
+            catch (Exception e)
             {
                 Snackbar.Add("Error occurred when creating order pdf", Severity.Error);
-            }
-            else
-            {
-                Snackbar.Add($"Order pdf was created at '{result}'", Severity.Success);
             }
         }
     }

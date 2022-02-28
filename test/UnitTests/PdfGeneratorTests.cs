@@ -74,15 +74,15 @@ public class PdfGeneratorTests
         
         var sut = new PdfGenerator(mockLogger.Object, configuration.Build());
         
-        Assert.Throws<PdfException>(() => sut.GenerateOrderPdfDocument(
-            new OrderPdfDocument(new OrderGetResult
+        Assert.Throws<PdfException>(() => sut.SaveOrderPdfDocument(
+            new OrderGetResult
             {
                 ObjectNumber = "Value",
                 Address = "Value",
                 CustomerName = "Value",
                 CustomerPhoneNumber = "Value",
                 StartDate = DateTime.UtcNow,
-            })));
+            }));
     }
     
     [Fact]
@@ -98,18 +98,41 @@ public class PdfGeneratorTests
         
         var sut = new PdfGenerator(mockLogger.Object, configuration.Build());
         
-        var order = new OrderPdfDocument(new OrderGetResult
+        var order = new OrderGetResult
         {
             ObjectNumber = Guid.NewGuid().ToString("N"),
             Address = "Value",
             CustomerName = "Value",
             CustomerPhoneNumber = "Value",
             StartDate = DateTime.UtcNow,
-        });
+        };
         
-        var result = sut.GenerateOrderPdfDocument(order);
+        var result = sut.SaveOrderPdfDocument(order);
         
         Assert.Equal(order.ObjectNumber + ".pdf", result.Substring(result.LastIndexOf(Path.DirectorySeparatorChar) + 1));
         Assert.True(File.Exists(result));
+    }
+    
+    [Fact]
+    public void PdfGenerator_GenerateOrderPdfDocument_Should_Throw_For_Missing_Order_Values()
+    {
+        var mockLogger = new Mock<ILogger<PdfGenerator>>();
+        var configuration = new ConfigurationBuilder();
+        configuration.AddInMemoryCollection(new []
+        {
+            new KeyValuePair<string, string>("FileSettings:TemplateFileName", "somefile"),
+            new KeyValuePair<string, string>("FileSettings:OutputPath", "incorrect\\path"),
+        });
+        
+        var sut = new PdfGenerator(mockLogger.Object, configuration.Build());
+        
+        Assert.Throws<PdfException>(() => sut.SaveOrderPdfDocument(
+            new OrderGetResult
+            {
+                ObjectNumber = "Value",
+                Address = "Value",
+                CustomerName = "Value",
+                StartDate = DateTime.UtcNow,
+            }));
     }
 }

@@ -1,6 +1,8 @@
+using API.Contracts;
+
 namespace PDF;
 
 public interface IPdfGenerator
 {
-    string GenerateOrderPdfDocument(OrderPdfDocument order);
+    string SaveOrderPdfDocument(OrderGetResult order);
 }
